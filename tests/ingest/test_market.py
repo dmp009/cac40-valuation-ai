@@ -49,3 +49,27 @@ def test_download_deu_skips_existing(tmp_path):
     c = Company("MC.PA", "LVMH", "EUR", True, deu_url="http://invalid.test/x.pdf")
     (tmp_path / "MC.PA.pdf").write_bytes(b"x")
     assert download_deu(c, tmp_path) == tmp_path / "MC.PA.pdf"
+
+
+def test_nwc_operating_from_components():
+    raw = pd.DataFrame(
+        {pd.Timestamp("2024-12-31"): [100.0, 50.0, 30.0, 900.0, 700.0]},
+        index=[
+            "Receivables",
+            "Inventory",
+            "Payables",
+            "Working Capital",
+            "Cash And Cash Equivalents",
+        ],
+    )
+    df = normalize_statements(raw, "X", "EUR")
+    assert df.loc[df.line_item == "nwc", "value"].iloc[0] == 120.0
+
+
+def test_nwc_fallback_excludes_cash():
+    raw = pd.DataFrame(
+        {pd.Timestamp("2024-12-31"): [900.0, 700.0]},
+        index=["Working Capital", "Cash And Cash Equivalents"],
+    )
+    df = normalize_statements(raw, "X", "EUR")
+    assert df.loc[df.line_item == "nwc", "value"].iloc[0] == 200.0

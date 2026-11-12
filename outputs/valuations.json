@@ -3,15 +3,15 @@
     "ticker": "MC.PA",
     "price": 404.70001220703125,
     "scenarios": {
-      "bear": 282.0303803806764,
-      "base": 348.448837035581,
-      "bull": 426.3915877555765
+      "bear": 275.36930734114117,
+      "base": 339.4275336208262,
+      "bull": 414.50397237779737
     },
-    "wacc": 0.09842833946391921,
+    "wacc": 0.09842834400445095,
     "g": 0.02,
-    "ev_base": 202380870846.31512,
-    "upside_base": -0.1389947454280629,
-    "tv_gordon_vs_exit_gap": -0.5322597797183123,
+    "ev_base": 197902776914.70593,
+    "upside_base": -0.16128608010225065,
+    "tv_gordon_vs_exit_gap": -0.5330936156037616,
     "driver_sources": {
       "revenue_growth": "historical",
       "ebit_margin": "historical",
@@ -24,15 +24,15 @@
     "ticker": "RMS.PA",
     "price": 1352.5,
     "scenarios": {
-      "bear": 604.3783409354182,
-      "base": 657.1521782096106,
-      "bull": 716.6564709286062
+      "bear": 734.7805745483594,
+      "base": 847.7672298232618,
+      "bull": 977.5448891969912
     },
-    "wacc": 0.11320245419889358,
+    "wacc": 0.11320242944277163,
     "g": 0.02,
-    "ev_base": 59006412757.71887,
-    "upside_base": -0.5141203857969607,
-    "tv_gordon_vs_exit_gap": -0.6585505535576437,
+    "ev_base": 78989792352.42886,
+    "upside_base": -0.37318504264453844,
+    "tv_gordon_vs_exit_gap": -0.5467956953390833,
     "driver_sources": {
       "revenue_growth": "historical",
       "ebit_margin": "historical",
@@ -45,15 +45,15 @@
     "ticker": "KER.PA",
     "price": 189.24000549316406,
     "scenarios": {
-      "bear": 66.77570963401699,
-      "base": 96.76491846194382,
-      "bull": 132.57818578705593
+      "bear": 15.984094482716769,
+      "base": 48.58814772721075,
+      "bull": 87.90758462246575
     },
-    "wacc": 0.08011962708098751,
+    "wacc": 0.08011963394254328,
     "g": 0.02,
-    "ev_base": 26510348266.289932,
-    "upside_base": -0.4886656327779526,
-    "tv_gordon_vs_exit_gap": -0.43221719964890254,
+    "ev_base": 20602895728.750435,
+    "upside_base": -0.7432458977128602,
+    "tv_gordon_vs_exit_gap": -0.4832279859726196,
     "driver_sources": {
       "revenue_growth": "historical",
       "ebit_margin": "historical",
@@ -66,15 +66,15 @@
     "ticker": "OR.PA",
     "price": 446.8500061035156,
     "scenarios": {
-      "bear": 171.31746000569515,
-      "base": 212.40657531964158,
-      "bull": 261.0996123645929
+      "bear": 163.84979772567817,
+      "base": 206.307126905088,
+      "bull": 256.6400869236746
     },
-    "wacc": 0.0892016833156152,
+    "wacc": 0.08920169667943283,
     "g": 0.02,
-    "ev_base": 115480724941.22835,
-    "upside_base": -0.5246580006302244,
-    "tv_gordon_vs_exit_gap": -0.39451282567198365,
+    "ev_base": 112224942897.37814,
+    "upside_base": -0.5383078794066399,
+    "tv_gordon_vs_exit_gap": -0.3884687066735136,
     "driver_sources": {
       "revenue_growth": "historical",
       "ebit_margin": "historical",
@@ -87,15 +87,15 @@
     "ticker": "EL.PA",
     "price": 179.89999389648438,
     "scenarios": {
-      "bear": 114.26642034098043,
-      "base": 149.57211986424056,
-      "bull": 191.5009340915709
+      "bear": 115.52825905341804,
+      "base": 150.64005456670503,
+      "bull": 192.33617663314035
     },
-    "wacc": 0.08167249556372508,
+    "wacc": 0.08167249731205635,
     "g": 0.02,
-    "ev_base": 80738355819.41414,
-    "upside_base": -0.16858185136845905,
-    "tv_gordon_vs_exit_gap": -0.38818817036064646,
+    "ev_base": 81233012819.96875,
+    "upside_base": -0.16264558267086826,
+    "tv_gordon_vs_exit_gap": -0.3892868343927818,
     "driver_sources": {
       "revenue_growth": "historical",
       "ebit_margin": "historical",
