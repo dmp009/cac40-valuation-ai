@@ -93,15 +93,20 @@ minus cash; a missing inventory line counts as zero (relevant for service-like b
   step when available (percentages parsed from guidance statements on `revenue_growth` /
   `organic_growth` and `operating_margin` / `ebit_margin`; a range such as "5–7%" uses its
   midpoint). Otherwise they are the historical averages. D&A, capex and NWC percentages are
-  always historical.
+  historical unless overridden.
 - **Bear / bull.** Base growth −/+3 pp and base EBIT margin −/+2 pp, flat over the five years.
-- **Overrides.** `config/assumptions/<ticker>.yaml` can set `revenue_growth` and/or
-  `ebit_margin` per scenario, either one value or a list of five yearly values:
+- **Overrides.** `config/assumptions/<ticker>.yaml` can override any driver per scenario
+  (`bear`, `base`, `bull`). `revenue_growth` and `ebit_margin` take one value or a list of
+  five yearly values; `da_pct`, `capex_pct` and `nwc_pct` take one value. Unknown scenarios
+  or driver names are logged as warnings and ignored.
 
   ```yaml
   base:
     revenue_growth: [0.03, 0.04, 0.05, 0.05, 0.05]
     ebit_margin: 0.22
+    capex_pct: 0.07
+  bear:
+    nwc_pct: 0.25
   ```
 
 - **Source labels.** Each driver is tagged `historical`, `guidance` or `override`. The tags are

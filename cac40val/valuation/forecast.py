@@ -1,5 +1,6 @@
 """Historical drivers, scenario construction and 5-year projection (no I/O)."""
 
+import logging
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -7,6 +8,8 @@ from dataclasses import dataclass
 import pandas as pd
 
 from cac40val.valuation.dcf import fcff, normalized_terminal_fcff
+
+logger = logging.getLogger(__name__)
 
 CANONICAL_ITEMS = [
     "revenue",
@@ -31,6 +34,8 @@ HORIZON = 5
 GROWTH_SPREAD = 0.03
 MARGIN_SPREAD = 0.02
 _SCALAR_DRIVERS = ("da_pct", "capex_pct", "nwc_pct")
+_PATH_DRIVERS = ("revenue_growth", "ebit_margin")
+SCENARIOS = ("bear", "base", "bull")
 
 
 @dataclass
@@ -77,6 +82,21 @@ def _expand(value: float | list[float], name: str) -> list[float]:
     return [float(value)] * HORIZON
 
 
+def _scalar(value, name: str) -> float:
+    if isinstance(value, (list, tuple)):
+        raise TypeError(f"Override '{name}' must be a single value, got a list")
+    return float(value)
+
+
+def _warn_unknown_overrides(overrides: dict) -> None:
+    for scenario, ov in overrides.items():
+        if scenario not in SCENARIOS:
+            logger.warning("Ignoring override for unknown scenario '%s'", scenario)
+            continue
+        for key in set(ov or {}) - {*_PATH_DRIVERS, *_SCALAR_DRIVERS}:
+            logger.warning("Ignoring unknown override '%s' in scenario '%s'", key, scenario)
+
+
 def _require(hist: dict, key: str) -> float:
     v = hist.get(key)
     if v is None or (isinstance(v, float) and math.isnan(v)):
@@ -91,7 +111,12 @@ def build_scenarios(
     overrides: dict,
     tax_rate: float,
 ) -> dict[str, Drivers]:
-    """Bear/base/bull drivers; base = guidance else history, spreads +/-3pp growth, +/-2pp margin."""
+    """Bear/base/bull drivers; base = guidance else history, spreads +/-3pp growth, +/-2pp margin.
+
+    ``overrides`` maps scenario -> {driver: value}. ``revenue_growth`` and ``ebit_margin`` take
+    one value or five yearly values; ``da_pct``, ``capex_pct`` and ``nwc_pct`` take one value.
+    Unknown scenarios or drivers are logged and ignored.
+    """
     scalars = {k: _require(hist, k) for k in _SCALAR_DRIVERS}
     if guidance_growth is not None:
         base_g, g_src = guidance_growth, "guidance"
@@ -102,6 +127,8 @@ def build_scenarios(
     else:
         base_m, m_src = _require(hist, "ebit_margin"), "historical"
 
+    overrides = overrides or {}
+    _warn_unknown_overrides(overrides)
     shifts = {"bear": -1, "base": 0, "bull": 1}
     out: dict[str, Drivers] = {}
     for name, sign in shifts.items():
@@ -109,7 +136,8 @@ def build_scenarios(
         margin = [base_m + sign * MARGIN_SPREAD] * HORIZON
         sources = {"revenue_growth": g_src, "ebit_margin": m_src}
         sources.update({k: "historical" for k in _SCALAR_DRIVERS})
-        ov = (overrides or {}).get(name) or {}
+        values = dict(scalars)
+        ov = overrides.get(name) or {}
         if "revenue_growth" in ov:
             growth, sources["revenue_growth"] = (
                 _expand(ov["revenue_growth"], "revenue_growth"),
@@ -117,8 +145,11 @@ def build_scenarios(
             )
         if "ebit_margin" in ov:
             margin, sources["ebit_margin"] = _expand(ov["ebit_margin"], "ebit_margin"), "override"
+        for key in _SCALAR_DRIVERS:
+            if key in ov:
+                values[key], sources[key] = _scalar(ov[key], key), "override"
         out[name] = Drivers(
-            revenue_growth=growth, ebit_margin=margin, tax_rate=tax_rate, sources=sources, **scalars
+            revenue_growth=growth, ebit_margin=margin, tax_rate=tax_rate, sources=sources, **values
         )
     return out
 

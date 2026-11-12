@@ -134,3 +134,29 @@ def test_terminal_fcff_fn_uses_year5_levels():
     assert tf(0.02) == pytest.approx(
         normalized_terminal_fcff(rev5, 0.24, 0.25, 0.05, 0.06, 0.10, 0.02)
     )
+
+
+def test_scalar_driver_overrides_per_scenario():
+    ov = {"bear": {"capex_pct": 0.08, "nwc_pct": 0.12}, "base": {"da_pct": 0.045}}
+    s = build_scenarios(_hist(), None, None, ov, 0.258)
+    assert s["bear"].capex_pct == 0.08 and s["bear"].sources["capex_pct"] == "override"
+    assert s["bear"].nwc_pct == 0.12 and s["bear"].sources["nwc_pct"] == "override"
+    assert s["bear"].da_pct == 0.05 and s["bear"].sources["da_pct"] == "historical"
+    assert s["base"].da_pct == 0.045 and s["base"].sources["da_pct"] == "override"
+    assert s["bull"].capex_pct == 0.06 and s["bull"].sources["capex_pct"] == "historical"
+
+
+def test_scalar_override_rejects_list():
+    with pytest.raises(TypeError, match="capex_pct"):
+        build_scenarios(_hist(), None, None, {"base": {"capex_pct": [0.1] * 5}}, 0.258)
+
+
+def test_unknown_override_keys_warn(caplog):
+    import logging
+
+    ov = {"base": {"wacc": 0.08, "ebit_margin": 0.3}, "worst": {"revenue_growth": 0.0}}
+    with caplog.at_level(logging.WARNING):
+        s = build_scenarios(_hist(), None, None, ov, 0.258)
+    assert s["base"].ebit_margin == [0.3] * 5
+    assert "wacc" in caplog.text
+    assert "worst" in caplog.text
