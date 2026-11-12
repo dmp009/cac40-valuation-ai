@@ -61,6 +61,22 @@ class CompanyValuation:
     football: pd.DataFrame
     extraction: Extraction | None
     tv_gordon_vs_exit_gap: float
+    # Inputs needed to rebuild the model in Excel with live formulas.
+    last_revenue: float
+    last_nwc: float
+    net_debt: float
+    minorities: float
+    associates: float
+    shares: float
+    rf: float
+    erp: float
+    beta: float
+    kd: float
+    tax: float
+    market_cap: float
+    gross_debt: float
+    historicals: pd.DataFrame
+    peers: pd.DataFrame
 
 
 # ---------------------------------------------------------------- guidance
@@ -327,6 +343,21 @@ def value_company(
         football=football,
         extraction=extraction,
         tv_gordon_vs_exit_gap=float(gap),
+        last_revenue=last_rev,
+        last_nwc=last_nwc,
+        net_debt=net_debt,
+        minorities=minorities,
+        associates=associates,
+        shares=shares,
+        rf=rf,
+        erp=erp,
+        beta=beta,
+        kd=float(kd),
+        tax=settings.tax_rate,
+        market_cap=float(row["market_cap_eur"]),
+        gross_debt=debt,
+        historicals=wide,
+        peers=peers_multiples,
     )
 
 
@@ -359,7 +390,14 @@ def write_outputs(valuations: list[CompanyValuation], out_dir: Path = Path("outp
     (out_dir / "valuations.json").write_text(
         json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
-    # Excel / PDF writers are added here by a later task.
+    from cac40val.outputs.excel import write_excel
+    from cac40val.outputs.onepager import write_onepager
+
+    for v in valuations:
+        target = out_dir / v.ticker
+        target.mkdir(parents=True, exist_ok=True)
+        write_excel(v, target / f"{v.ticker}_model.xlsx")
+        write_onepager(v, target / f"{v.ticker}_onepager.pdf")
 
 
 def export_snapshot(con: duckdb.DuckDBPyConnection, out_dir: Path = SNAPSHOT_DIR) -> None:
