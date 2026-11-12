@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import pytest
 from pytest import approx
 
@@ -35,3 +36,24 @@ def test_sensitivity_grid_shape_center_and_nan():
     assert grid.iloc[2, 2] == approx(1110.909091 / 100)
     grid2 = sensitivity_grid([100, 110], 0.025, 0.02, 200, 100)
     assert math.isnan(grid2.iloc[1, 2])
+
+
+def test_sensitivity_grid_nan_on_float_tie_rate_equals_g():
+    # 0.07 - 0.005 and 0.06 + 0.005 differ only by float rounding.
+    grid = sensitivity_grid([100, 110], 0.07, 0.06, 0, 1)
+    assert math.isnan(grid.iloc[1, 4])
+    finite = grid.to_numpy()[~np.isnan(grid.to_numpy())]
+    assert finite.max() < 1e6
+
+
+def test_sensitivity_grid_nan_on_float_tie_second_case():
+    grid = sensitivity_grid([100, 110], 0.035, 0.0275, 0, 1)
+    assert math.isnan(grid.iloc[0, 1])  # 0.025 vs 0.025
+    assert math.isnan(grid.iloc[1, 3])  # 0.030 vs 0.030
+    finite = grid.to_numpy()[~np.isnan(grid.to_numpy())]
+    assert finite.max() < 1e6
+
+
+def test_gordon_raises_on_near_tie():
+    with pytest.raises(ValueError):
+        gordon_terminal_value(110, 0.065 + 1e-12, 0.065)

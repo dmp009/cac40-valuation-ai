@@ -7,6 +7,9 @@ import pandas as pd
 
 RATE_OFFSETS = [-0.01, -0.005, 0.0, 0.005, 0.01]
 G_OFFSETS = [-0.005, -0.0025, 0.0, 0.0025, 0.005]
+# Smallest discount-rate-minus-growth spread accepted by the Gordon model. Grid offsets such as
+# 0.07 - 0.005 vs 0.06 + 0.005 tie up to float rounding and would otherwise give ~1e19 values.
+MIN_SPREAD = 1e-6
 
 
 def fcff(ebit: float, tax_rate: float, da: float, capex: float, delta_nwc: float) -> float:
@@ -21,7 +24,7 @@ def discount(cash_flows: Sequence[float], rate: float) -> float:
 
 def gordon_terminal_value(last_fcff: float, rate: float, g: float) -> float:
     """Terminal value at year n by the Gordon growth model."""
-    if rate <= g:
+    if rate - g < MIN_SPREAD:
         raise ValueError(f"Discount rate ({rate}) must exceed terminal growth ({g})")
     return last_fcff * (1 + g) / (rate - g)
 
@@ -60,7 +63,7 @@ def sensitivity_grid(
     values = np.full((len(rates), len(gs)), np.nan)
     for i, r in enumerate(rates):
         for j, g in enumerate(gs):
-            if r <= g:
+            if r - g < MIN_SPREAD:
                 continue
             ev = enterprise_value(fcffs, r, g)
             values[i, j] = equity_bridge(ev, net_debt, minorities, associates) / shares
