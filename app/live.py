@@ -24,7 +24,7 @@ def recompute(v: CompanyValuation, scenario: str, growth: float, margin: float) 
         revenue_growth=[growth] * HORIZON,
         ebit_margin=[margin] * HORIZON,
     )
-    proj = project(v.last_revenue, v.last_nwc, drivers)
+    proj = project(v.last_revenue, drivers)
     fcffs = list(proj["fcff"])
     ev = dcf.enterprise_value(fcffs, v.wacc, v.g)
     per_share = dcf.equity_bridge(ev, v.net_debt, v.minorities, v.associates) / v.shares

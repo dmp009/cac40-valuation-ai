@@ -122,10 +122,16 @@ def build_scenarios(
     return out
 
 
-def project(last_revenue: float, last_nwc: float, d: Drivers) -> pd.DataFrame:
-    """Project years 1..5: revenue, EBIT, D&A, capex, NWC, change in NWC, FCFF, EBITDA."""
+def project(last_revenue: float, d: Drivers) -> pd.DataFrame:
+    """Project years 1..5: revenue, EBIT, D&A, capex, NWC, change in NWC, FCFF, EBITDA.
+
+    NWC is modelled as ``nwc_pct`` of revenue in every year, including the opening (year 0)
+    balance, so year-1 change in NWC is ``nwc_pct * (revenue_1 - last_revenue)``. Starting from
+    the actual NWC level instead would book the whole gap between the latest ratio and the
+    historical average as a one-off year-1 cash flow.
+    """
     rows = []
-    revenue, prev_nwc = last_revenue, last_nwc
+    revenue, prev_nwc = last_revenue, last_revenue * d.nwc_pct
     for g, m in zip(d.revenue_growth, d.ebit_margin, strict=True):
         revenue = revenue * (1 + g)
         ebit = revenue * m

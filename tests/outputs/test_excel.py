@@ -26,3 +26,10 @@ def test_excel_engine_check_cell(valuation, tmp_path):
     labels = {c.value: ws.cell(c.row, c.column + 1).value for row in ws.iter_rows() for c in row}
     assert labels["Engine check (static, base per share)"] == valuation.scenarios["base"]
     assert str(labels["Base value per share (EUR)"]).startswith("=DCF!")
+
+
+def test_excel_year1_delta_nwc_uses_driver_basis(valuation, tmp_path):
+    wb = load_workbook(write_excel(valuation, tmp_path / "m.xlsx"))
+    assert wb["DCF"]["B9"].value == "=B8-Assumptions!$B$4*Assumptions!$B$10"
+    assert wb["DCF"]["C9"].value == "=C8-B8"
+    assert "memo" in wb["Assumptions"]["A5"].value

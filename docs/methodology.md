@@ -111,19 +111,24 @@ In the committed outputs no AI cache and no overrides exist, so every driver is 
 
 ## 5. Forecast and free cash flow
 
-For each year t = 1..5, starting from the latest actual revenue and NWC:
+For each year t = 1..5, starting from the latest actual revenue (Revenue_0):
 
     Revenue_t = Revenue_{t-1} × (1 + growth_t)
     EBIT_t    = Revenue_t × margin_t
     D&A_t     = Revenue_t × D&A%
     Capex_t   = Revenue_t × capex%
-    NWC_t     = Revenue_t × NWC%
+    NWC_t     = Revenue_t × NWC%            (t = 0..5, including the opening balance)
     ΔNWC_t    = NWC_t − NWC_{t-1}
     FCFF_t    = EBIT_t × (1 − t) + D&A_t − Capex_t − ΔNWC_t
     EBITDA_t  = EBIT_t + D&A_t
 
-Year-1 ΔNWC is measured against the latest actual NWC, so a gap between the actual NWC ratio
-and the historical average shows up in year 1.
+The opening NWC is put on the same basis as the forecast, `NWC_0 = Revenue_0 × NWC%`, so
+year-1 ΔNWC is `NWC% × (Revenue_1 − Revenue_0)`, the cash tied up by growth alone. Measuring
+year 1 against the latest actual NWC level instead would book the whole gap between this
+year's NWC ratio and the four-year average as a one-off cash flow (for LVMH, Hermès,
+EssilorLuxottica and L'Oréal that gap is €0.6–0.9bn in a single year), which is a modelling
+artefact rather than a forecast. The latest actual NWC is still shown in the Excel model as
+a memo line.
 
 ## 6. Terminal value and enterprise value
 

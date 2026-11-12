@@ -63,7 +63,7 @@ class CompanyValuation:
     tv_gordon_vs_exit_gap: float
     # Inputs needed to rebuild the model in Excel with live formulas.
     last_revenue: float
-    last_nwc: float
+    last_nwc: float  # memo only (latest actual operating NWC); not used in the projection
     net_debt: float
     minorities: float
     associates: float
@@ -289,7 +289,7 @@ def value_company(
     drivers = build_scenarios(hist, g_guid, m_guid, load_overrides(ticker), settings.tax_rate)
     last_rev = float(row["revenue_eur"])
     last_nwc = float(row["nwc_eur"]) if math.isfinite(row["nwc_eur"]) else 0.0
-    projections = {n: project(last_rev, last_nwc, d) for n, d in drivers.items()}
+    projections = {n: project(last_rev, d) for n, d in drivers.items()}
 
     minorities = float(row["minorities_eur"])
     associates = float(row["associates_eur"])

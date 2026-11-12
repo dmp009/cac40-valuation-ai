@@ -90,7 +90,7 @@ def test_override_list_and_bad_length():
 
 def test_project_fcff_year1():
     d = Drivers([0.10] * 5, [0.25] * 5, 0.05, 0.06, 0.10, 0.25, {})
-    df = project(100, 10, d)
+    df = project(100, d)
     assert list(df.index) == [1, 2, 3, 4, 5]
     assert list(df.columns) == [
         "revenue",
@@ -109,3 +109,15 @@ def test_project_fcff_year1():
     assert r["fcff"] == pytest.approx(18.525)
     assert r["ebitda"] == pytest.approx(27.5 + 5.5)
     assert df.loc[2, "delta_nwc"] == pytest.approx(1.1)
+
+
+def test_year1_delta_nwc_uses_driver_basis_not_actual_level():
+    """Year-1 dNWC is measured on the same NWC%-of-revenue basis as later years.
+
+    The latest actual NWC level (e.g. 30, far from 10% of revenue) must not leak into year 1.
+    """
+    d = Drivers([0.10] * 5, [0.25] * 5, 0.05, 0.06, 0.10, 0.25, {})
+    df = project(100, d)
+    rev1 = df.loc[1, "revenue"]
+    assert df.loc[1, "delta_nwc"] == pytest.approx(rev1 * 0.10 - 100 * 0.10)
+    assert df.loc[1, "delta_nwc"] == pytest.approx(0.10 * (rev1 - 100))

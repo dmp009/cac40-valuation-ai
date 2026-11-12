@@ -84,7 +84,7 @@ def _assumptions(wb, v):
     _header(ws, 3, ["Driver", "Y1", "Y2", "Y3", "Y4", "Y5"])
     rows = [
         (4, "Last actual revenue (EUR m)", v.last_revenue, MN),
-        (5, "Last actual NWC (EUR m)", v.last_nwc, MN),
+        (5, "Last actual NWC (memo, not used)", v.last_nwc, MN),
         (8, "D&A % revenue", d.da_pct, PCT),
         (9, "Capex % revenue", d.capex_pct, PCT),
         (10, "NWC % revenue", d.nwc_pct, PCT),
@@ -173,7 +173,7 @@ def _dcf(wb, v):
         _put(ws, f"{col}6", f"={col}4*Assumptions!$B$8", MN)
         _put(ws, f"{col}7", f"={col}4*Assumptions!$B$9", MN)
         _put(ws, f"{col}8", f"={col}4*Assumptions!$B$10", MN)
-        prev_nwc = "Assumptions!$B$5" if i == 0 else f"{prev}8"
+        prev_nwc = "Assumptions!$B$4*Assumptions!$B$10" if i == 0 else f"{prev}8"
         _put(ws, f"{col}9", f"={col}8-{prev_nwc}", MN)
         _put(ws, f"{col}10", f"={col}5*(1-Assumptions!$B$11)+{col}6-{col}7-{col}9", MN)
         _put(ws, f"{col}11", f"=1/(1+WACC!$B$15)^{col}3", "0.0000")

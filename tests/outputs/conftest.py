@@ -23,7 +23,7 @@ def make_valuation(extraction=None) -> CompanyValuation:
         tax_rate=0.25,
         sources={"revenue_growth": "historical", "ebit_margin": "guidance"},
     )
-    proj = project(LAST_REV, LAST_NWC, d)
+    proj = project(LAST_REV, d)
     rate = wacc.wacc(50e9, 10e9, 0.08, 0.03, 0.25)
     g = 0.02
     ev = dcf.enterprise_value(list(proj["fcff"]), rate, g)
