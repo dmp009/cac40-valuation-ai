@@ -4,7 +4,7 @@
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-**Live demo:** coming soon (Streamlit Community Cloud)
+**Live demo:** [cac40-valuation-ai.streamlit.app](https://cac40-valuation-ai-fwbhhh2dtgylazpkumcys3.streamlit.app/) (Streamlit Community Cloud)
 
 A reproducible equity valuation pipeline for five CAC 40 luxury and premium-consumer
 companies: LVMH, Hermès, Kering, L'Oréal and EssilorLuxottica. It combines a DCF with three
