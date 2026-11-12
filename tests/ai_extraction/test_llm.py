@@ -62,3 +62,25 @@ def test_no_tool_use_raises(monkeypatch):
     monkeypatch.setattr(anthropic, "Anthropic", Fake)
     with pytest.raises(RuntimeError):
         AnthropicClient(S).extract("hi", ExtractionPayload)
+
+
+def test_truncated_response_raises(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+
+    class Block:
+        type = "tool_use"
+        input = {"guidance": [{"metric": "organic_growth"}]}
+
+    class Resp:
+        stop_reason = "max_tokens"
+        content = [Block()]
+
+    class Fake:
+        def __init__(self, **kw):
+            self.messages = type("M", (), {"create": lambda s, **kw: Resp()})()
+
+    import anthropic
+
+    monkeypatch.setattr(anthropic, "Anthropic", Fake)
+    with pytest.raises(RuntimeError, match="max_tokens"):
+        AnthropicClient(S).extract("hi", ExtractionPayload)

@@ -43,6 +43,10 @@ class AnthropicClient:
             tool_choice={"type": "tool", "name": TOOL_NAME},
             messages=[{"role": "user", "content": prompt}],
         )
+        if getattr(resp, "stop_reason", None) == "max_tokens":
+            raise RuntimeError(
+                "Anthropic response hit max_tokens; the tool input is truncated and was discarded"
+            )
         for block in resp.content:
             if getattr(block, "type", None) == "tool_use":
                 return dict(block.input)
