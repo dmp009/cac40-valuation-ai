@@ -281,5 +281,17 @@ between methods is the useful output for discussion.
   the same method and kept in the peer set by default; the app toggle removes them from comps.
 - **Statutory tax rate.** The forecast uses 25.8% for all companies, although a large part of
   their profit is earned outside France.
+- **Leases (IFRS 16).** All five targets report under IFRS 16. In the yfinance data D&A
+  includes depreciation of right-of-use assets and Total Debt includes lease liabilities,
+  while capex excludes right-of-use additions. Leases are therefore treated as debt: lease
+  payments are not deducted from FCFF (they sit below EBIT as interest and above it as
+  right-of-use depreciation added back with D&A), and the lease liability is deducted in the
+  equity bridge. Two side effects: D&A runs above capex for retailers with large store
+  networks (LVMH, Hermès, Kering), which flatters FCFF unless future right-of-use additions
+  are thought of as a debt-financed investment; and EBITDA multiples are post-IFRS 16 for
+  every company in the peer set, so they remain comparable with each other. The WACC uses
+  gross debt including leases. EssilorLuxottica's D&A also includes amortisation of
+  purchase-price-allocation intangibles from the Essilor–Luxottica merger and GrandVision,
+  which is a non-cash charge with no matching capex.
 - **Simplifications.** End-of-year discounting, flat drivers over five years, no explicit
-  treatment of leases, pensions or share buybacks.
+  treatment of pensions or share buybacks.
