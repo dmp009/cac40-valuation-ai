@@ -69,11 +69,15 @@ def test_truncated_response_raises(monkeypatch):
 
     class Block:
         type = "tool_use"
-        input = {"guidance": [{"metric": "organic_growth"}]}
+
+        def __init__(self):
+            self.input = {"guidance": [{"metric": "organic_growth"}]}
 
     class Resp:
         stop_reason = "max_tokens"
-        content = [Block()]
+
+        def __init__(self):
+            self.content = [Block()]
 
     class Fake:
         def __init__(self, **kw):

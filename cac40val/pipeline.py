@@ -210,12 +210,17 @@ def build_multiples(
 # ---------------------------------------------------------------- WACC inputs
 
 
+def resolve_erp(settings: Settings) -> float:
+    """Equity risk premium: the override when set (0.0 included), else Damodaran France."""
+    from cac40val.ingest.rates import load_erp
+
+    return float(settings.erp_override) if settings.erp_override is not None else load_erp()
+
+
 def resolve_market_params(
     con: duckdb.DuckDBPyConnection, settings: Settings, date: pd.Timestamp
 ) -> tuple[float, float]:
     """Resolve rf/erp (overrides first), store them at the valuation date, return them."""
-    from cac40val.ingest.rates import load_erp
-
     if settings.rf_override is not None:
         rf = float(settings.rf_override)
     else:
@@ -226,7 +231,7 @@ def resolve_market_params(
         if row is None:
             raise ValueError("No risk-free rate available (ingest OAT yields or set rf_override)")
         rf = float(row[0])
-    erp = float(settings.erp_override) if settings.erp_override is not None else load_erp()
+    erp = resolve_erp(settings)
     upsert(
         con,
         "fact_market_params",
@@ -430,7 +435,7 @@ def load_snapshot(dir: Path = SNAPSHOT_DIR) -> duckdb.DuckDBPyConnection:
 
 def _ingest(con: duckdb.DuckDBPyConnection, companies: list[Company], settings: Settings) -> None:
     from cac40val.ingest.market import fetch_company, fetch_fx, fetch_prices
-    from cac40val.ingest.rates import fetch_oat10y, load_erp
+    from cac40val.ingest.rates import fetch_oat10y
 
     upsert(
         con,
@@ -460,7 +465,7 @@ def _ingest(con: duckdb.DuckDBPyConnection, companies: list[Company], settings: 
         logger.exception("Benchmark ingest failed")
     try:
         oat = fetch_oat10y()
-        oat["erp_france"] = float(settings.erp_override) if settings.erp_override else load_erp()
+        oat["erp_france"] = resolve_erp(settings)
         upsert(con, "fact_market_params", oat)
     except Exception:
         logger.exception("OAT ingest failed")

@@ -237,3 +237,14 @@ def test_run_extractions_survives_a_failing_company(con, monkeypatch, caplog):
         out = pipeline.run_extractions(con, targets, refresh=False, client=None)
     assert out == {"TGT": None, "P1": good}
     assert "AI extraction failed for TGT" in caplog.text
+
+
+def test_erp_override_zero_is_honoured(monkeypatch):
+    import dataclasses
+
+    from cac40val import pipeline
+    from cac40val.ingest import rates
+
+    monkeypatch.setattr(rates, "load_erp", lambda: 0.0501)
+    assert pipeline.resolve_erp(dataclasses.replace(SETTINGS, erp_override=0.0)) == 0.0
+    assert pipeline.resolve_erp(SETTINGS) == 0.0501
