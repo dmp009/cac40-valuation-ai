@@ -74,6 +74,19 @@ def test_balance_sheet_identity_warning():
     assert any(i.severity == "warning" and "2024" in i.detail for i in issues)
 
 
+def test_balance_identity_counts_minority_interest():
+    # yfinance: liabilities and stockholders' equity both exclude minority interest,
+    # so assets = liabilities + equity + minorities must not be flagged.
+    con = connect(":memory:")
+    df = _fin()
+    df = df[df.fiscal_year == 2024]
+    vals = {"total_assets": 200.0, "total_liabilities": 100.0, "total_equity": 80.0, "minorities": 20.0}
+    for item, v in vals.items():
+        df.loc[df.line_item == item, "value"] = v
+    upsert(con, "fact_financials", df)
+    assert "balance_sheet_identity" not in _checks(run_quality_checks(con))
+
+
 def test_mixed_currency_flagged():
     con = connect(":memory:")
     df = _fin()

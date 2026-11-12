@@ -15,7 +15,7 @@ fiscal_year,line_item,value
 2020,shares_outstanding,10
 2020,total_assets,200
 2020,total_liabilities,120.0
-2020,total_equity,80.0
+2020,total_equity,78.0
 2021,revenue,110
 2021,ebit,27.5
 2021,ebitda,33.0
@@ -32,7 +32,7 @@ fiscal_year,line_item,value
 2021,shares_outstanding,10
 2021,total_assets,220
 2021,total_liabilities,132.0
-2021,total_equity,88.0
+2021,total_equity,85.8
 2022,revenue,121
 2022,ebit,30.25
 2022,ebitda,36.3
@@ -49,7 +49,7 @@ fiscal_year,line_item,value
 2022,shares_outstanding,10
 2022,total_assets,242
 2022,total_liabilities,145.2
-2022,total_equity,96.8
+2022,total_equity,94.38
 2023,revenue,133.1
 2023,ebit,33.275
 2023,ebitda,39.93
@@ -66,7 +66,7 @@ fiscal_year,line_item,value
 2023,shares_outstanding,10
 2023,total_assets,266.2
 2023,total_liabilities,159.72
-2023,total_equity,106.48
+2023,total_equity,103.818
 2024,revenue,146.41
 2024,ebit,36.6025
 2024,ebitda,43.923
@@ -83,4 +83,4 @@ fiscal_year,line_item,value
 2024,shares_outstanding,10
 2024,total_assets,292.82
 2024,total_liabilities,175.692
-2024,total_equity,117.128
+2024,total_equity,114.1998

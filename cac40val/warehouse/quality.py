@@ -95,13 +95,16 @@ def run_quality_checks(con: duckdb.DuckDBPyConnection) -> list[QualityIssue]:
             a, li, e = r["total_assets"], r["total_liabilities"], r["total_equity"]
             if pd.isna(a) or pd.isna(li) or pd.isna(e) or a == 0:
                 continue
-            gap = abs(a - (li + e)) / abs(a)
+            # yfinance liabilities and stockholders' equity both exclude minority interest
+            m = r.get("minorities", 0.0)
+            m = 0.0 if pd.isna(m) else m
+            gap = abs(a - (li + e + m)) / abs(a)
             if gap > BALANCE_TOLERANCE:
                 issues.append(
                     QualityIssue(
                         "balance_sheet_identity",
                         ticker,
-                        f"FY{int(fy)}: assets vs liabilities+equity off by {gap:.1%}",
+                        f"FY{int(fy)}: assets vs liabilities+equity+minorities off by {gap:.1%}",
                         "warning",
                     )
                 )

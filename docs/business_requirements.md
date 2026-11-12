@@ -46,7 +46,7 @@ As an associate, I want automated data-quality checks with a written report, so 
 which numbers to challenge before I review a model.
 
 - Checks run on every pipeline run: non-null keys, positive revenue, balance-sheet identity
-  (assets = liabilities + equity within 1%), one currency per company, missing line items.
+  (assets = liabilities + equity + minority interest within 1%), one currency per company, missing line items.
 - Results are written to `data_quality_report.md` with severity (error / warning), check,
   ticker and detail.
 - No check failure is silently ignored: an empty report says "No issues found".

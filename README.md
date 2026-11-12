@@ -168,8 +168,10 @@ Until then the base case is driven by historical averages, and the outputs say s
 - **Data model and lineage**: star-schema and pipeline diagrams in
   [docs/data_model.md](docs/data_model.md).
 - **Data quality**: pandera schemas (non-null keys, positive revenue), balance-sheet identity
-  within 1%, one currency per company, missing line items and the AI segment cross-check. The
-  latest run has 0 errors and 42 warnings, all listed in
+  (assets = liabilities + equity + minority interest, within 1%), one currency per company,
+  missing line items and the AI segment cross-check. The latest run has 0 errors and 32
+  warnings, all the same one: yfinance does not provide associates (equity-accounted
+  investments), so they are set to 0 and flagged. Full list in
   [data_quality_report.md](data_quality_report.md).
 - **Lineage**: timestamped raw files, a `source` column on financials, the model name and
   timestamp on every AI fact, and a source label on every forecast driver.

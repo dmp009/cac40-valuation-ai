@@ -280,9 +280,6 @@ between methods is the useful output for discussion.
   latest DEUs must be added before the first extraction run.
 - **Associates missing.** yfinance does not return equity-accounted investments for any of the
   companies; they are treated as zero (a warning in the data-quality report).
-- **Balance-sheet identity.** For LVMH, Kering and EssilorLuxottica, total assets differ from
-  liabilities plus equity by 1–2.3% in the yfinance data (mainly how minority interests are
-  classified). Flagged as warnings.
 - **Comps on the latest fiscal year.** Multiples use the latest annual figures, not a true
   trailing-twelve-months or forward figure; no consensus estimates are used.
 - **Not pure luxury.** L'Oréal (beauty) and EssilorLuxottica (eyewear and medical optics) are
