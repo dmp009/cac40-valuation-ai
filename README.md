@@ -76,11 +76,16 @@ finding about the assumptions, not a claim that the whole sector is mispriced:
   Blume adjustment, which pushes Hermès to an 11.3% WACC.
 - **Terminal growth is conservative.** A 2% perpetual growth rate is a standard,
   inflation-like assumption, but the market prices luxury houses on far higher multiples. The
-  pipeline reports the gap: the Gordon-growth terminal value is 39% to 55% below an exit value
-  at the peer median EV/EBITDA. The comps range in the football field shows the market view.
+  pipeline reports the gap: the Gordon-growth terminal value (on a year-6 cash flow normalised
+  for 2% growth) is 28% to 50% below an exit value at the peer median EV/EBITDA. The comps
+  range in the football field shows the market view.
 - **Drivers are historical.** With no AI guidance cached yet, the base case uses the average of
   the last four fiscal years. Kering's revenue fell from €20.4bn (FY2022) to €14.7bn (FY2025),
   so its base case projects a further 10% yearly decline, which explains the very low value.
+  The bear case (−13% a year) halves revenue by year 5, and the resulting enterprise value
+  barely covers net debt including leases, so it lands at about €1 per share. That is the
+  honest consequence of extrapolating the recent decline, not a claim that the equity is
+  worthless.
 - **Working capital is operating only.** NWC = receivables + inventory − payables. Cash is
   excluded because it is already counted in net debt; including it would count it twice and
   would make every year of cash build-up look like a cash outflow.

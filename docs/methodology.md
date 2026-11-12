@@ -149,7 +149,8 @@ FCFF_5 carries the NWC investment of the explicit period, sized for that period'
 rate. In perpetuity the business only grows at g, so it only needs NWC% × Revenue_5 × g of
 new working capital each year. Using FCFF_5 × (1 + g) would understate the terminal value
 when explicit growth is above g (the usual case) and overstate it when explicit growth is
-negative (Kering's bear case). With no NWC the two formulas are identical. No floor of capex
+negative (Kering, whose NWC release in a shrinking business is not a perpetual cash
+inflow). With no NWC the two formulas are identical. No floor of capex
 at D&A is imposed in the terminal year; the historical ratios are kept.
 
 The same normalised FCFF_6 is used in the sensitivity grid (recomputed for each g), the live
@@ -166,11 +167,14 @@ app and the Excel model (`DCF!B15`).
 
 | Company | Gordon vs exit gap |
 |---|---|
-| LVMH | −53% |
-| Hermès | −55% |
-| Kering | −48% |
-| L'Oréal | −39% |
-| EssilorLuxottica | −39% |
+| LVMH | −50% |
+| Hermès | −47% |
+| Kering | −50% |
+| L'Oréal | −29% |
+| EssilorLuxottica | −28% |
+
+Both terminal values use the same year-5 figures, and TV_Gordon is the normalised version
+above, so the gap compares like with like.
 
 A large negative gap means the market prices these companies on multiples that imply either
 much higher long-term growth or a lower discount rate than the DCF assumes. It is the main
@@ -192,7 +196,8 @@ The base-case value per share is recomputed on a 5 × 5 grid:
 - WACC: −100, −50, 0, +50, +100 bp around the computed WACC;
 - g: −50, −25, 0, +25, +50 bp around 2.0%.
 
-Cells where WACC ≤ g are left blank.
+Cells where WACC − g is below 1e-6 (WACC ≤ g, allowing for floating-point rounding of the
+offsets) are left blank.
 
 ## 9. Trading comparables
 
@@ -246,13 +251,17 @@ out *Overvalued*. The drivers are visible and each one is a deliberate, adjustab
 1. A 4.89% risk-free rate (the latest monthly OAT observation) and a 5.01% ERP give a high
    cost of equity, and betas of 1.2–1.3 against the Euro Stoxx 50 for LVMH, Hermès and Kering
    increase it further.
-2. g = 2% is an inflation-like perpetual growth rate. Luxury leaders trade at roughly 16–23× EBITDA
+2. g = 2% is an inflation-like perpetual growth rate. Luxury leaders trade at roughly 17–23× EBITDA
    (Hermès, L'Oréal, Richemont), which implies more long-term growth or more pricing power
-   than a 2% Gordon model gives credit for. The −39% to −55% Gordon vs exit gap measures
+   than a 2% Gordon model gives credit for. The −28% to −50% Gordon vs exit gap measures
    this.
 3. Drivers are four-year historical averages. Kering's revenue fell from €20.4bn in FY2022 to
    €14.7bn in FY2025 (−10% a year on average), so its base case extends that decline for five
-   more years.
+   more years (€34 per share). The bear case subtracts another 3 pp (−13% a year), which
+   halves revenue to €7.2bn by year 5; the resulting enterprise value of €14.7bn barely
+   covers net debt including leases (€13.8bn) and minorities (€0.8bn), leaving about €1 per
+   share. That is the honest arithmetic of extrapolating the recent decline, not a forecast
+   that the equity is worthless; the bull case and the comps range show the alternatives.
 4. Five flat forecast years then perpetuity: there is no fade period where high margins
    converge slowly, which penalises high-growth names such as Hermès.
 
@@ -284,9 +293,9 @@ between methods is the useful output for discussion.
 - **Leases (IFRS 16).** All five targets report under IFRS 16. In the yfinance data D&A
   includes depreciation of right-of-use assets and Total Debt includes lease liabilities,
   while capex excludes right-of-use additions. Leases are therefore treated as debt: lease
-  payments are not deducted from FCFF (they sit below EBIT as interest and above it as
-  right-of-use depreciation added back with D&A), and the lease liability is deducted in the
-  equity bridge. Two side effects: D&A runs above capex for retailers with large store
+  payments are not deducted from FCFF (their depreciation part is in EBIT but added back with
+  D&A, their interest part is below EBIT), and the lease liability is deducted in the equity
+  bridge through net debt. Two side effects: D&A runs above capex for retailers with large store
   networks (LVMH, Hermès, Kering), which flatters FCFF unless future right-of-use additions
   are thought of as a debt-financed investment; and EBITDA multiples are post-IFRS 16 for
   every company in the peer set, so they remain comparable with each other. The WACC uses
