@@ -11,21 +11,21 @@ class GuidanceItem(BaseModel):
     statement: str
     direction: Literal["up", "flat", "down"]
     horizon: str
-    page: int
+    page: int = Field(ge=1)
 
 
 class RiskItem(BaseModel):
     category: str
     description: str
     severity: int = Field(ge=1, le=5)
-    page: int
+    page: int = Field(ge=1)
 
 
 class SegmentItem(BaseModel):
     segment_name: str
     revenue_eur_m: float
     fiscal_year: int
-    page: int
+    page: int = Field(ge=1)
 
 
 class ManagementTone(BaseModel):
@@ -50,5 +50,5 @@ class Extraction(BaseModel):
     guidance: list[GuidanceItem]
     risks: list[RiskItem]
     segments: list[SegmentItem]
-    management_tone: ManagementTone
+    management_tone: ManagementTone | None = None
     rejected_count: int = 0

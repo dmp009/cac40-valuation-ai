@@ -56,11 +56,11 @@ def test_malformed_item_rejected_others_kept():
     assert ex.rejected_count == 1
 
 
-def test_bad_tone_falls_back_to_neutral_and_counts():
+def test_bad_tone_is_none_and_counts():
     raw = _raw()
     raw["management_tone"] = {"label": "euphoric", "rationale": "x"}
     ex = parse_extraction(raw, "MC.PA", 2025, "m")
-    assert ex.management_tone.label == "neutral"
+    assert ex.management_tone is None
     assert ex.rejected_count == 1
 
 
@@ -73,7 +73,7 @@ def test_segment_check_tolerance():
 def test_cache_hit_does_not_call_client(tmp_path):
     ex = parse_extraction(_raw(), "MC.PA", 2025, "m")
     (tmp_path / "MC.PA_2025.json").write_text(ex.model_dump_json(indent=2))
-    got = get_extraction(CO, 2025, refresh=True, client=BoomClient(), cache_dir=tmp_path)
+    got = get_extraction(CO, 2025, refresh=False, client=BoomClient(), cache_dir=tmp_path)
     assert got == ex
 
 
@@ -140,3 +140,40 @@ def test_to_rows_complete_and_upsertable():
 
 def test_tone_model():
     assert ManagementTone(label="positive", rationale="r").label == "positive"
+
+
+def test_page_zero_rejected():
+    raw = _raw()
+    raw["risks"][0]["page"] = 0
+    ex = parse_extraction(raw, "MC.PA", 2025, "m")
+    assert len(ex.risks) == 1 and ex.rejected_count == 1
+
+
+def test_page_outside_allowed_set_rejected():
+    ex = parse_extraction(_raw(), "MC.PA", 2025, "m", allowed_pages={2})
+    assert len(ex.guidance) == 1 and ex.risks == [] and ex.segments == []
+    assert ex.rejected_count == 4
+
+
+def test_to_rows_skips_missing_tone():
+    raw = _raw()
+    raw["management_tone"] = None
+    df = to_rows(parse_extraction(raw, "MC.PA", 2025, "m"))
+    assert "tone" not in set(df["field"])
+
+
+def test_refresh_overwrites_existing_cache(tmp_path, monkeypatch):
+    pdf = tmp_path / "MC.PA.pdf"
+    doc = pymupdf.open()
+    for t in ["Cover", "Outlook 2026", "Segments"]:
+        doc.new_page().insert_text((72, 72), t)
+    doc.save(pdf)
+    monkeypatch.setattr(ex_mod, "download_deu", lambda company: pdf)
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    old = parse_extraction({**_raw(), "risks": []}, "MC.PA", 2025, "old")
+    f = cache / "MC.PA_2025.json"
+    f.write_text(old.model_dump_json(indent=2))
+    got = get_extraction(CO, 2025, refresh=True, client=FakeClient(_raw()), cache_dir=cache)
+    assert len(got.risks) == 2
+    assert len(Extraction.model_validate_json(f.read_text()).risks) == 2
