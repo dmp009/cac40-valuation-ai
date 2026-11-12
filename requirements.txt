@@ -1,0 +1,15 @@
+pyyaml
+requests
+pandera
+pandas
+numpy
+yfinance
+duckdb
+pymupdf
+pydantic>=2
+anthropic
+openpyxl
+streamlit
+plotly
+matplotlib
+.
