@@ -1,0 +1,15 @@
+{
+  "guidance": [
+    {"metric": "organic revenue growth", "statement": "Mid-single-digit growth expected in 2026",
+     "direction": "up", "horizon": "FY2026", "page": 2}
+  ],
+  "risks": [
+    {"category": "macro", "description": "Slowdown in Chinese demand", "severity": 4, "page": 3},
+    {"category": "fx", "description": "USD weakness", "severity": 2, "page": 3}
+  ],
+  "segments": [
+    {"segment_name": "Fashion", "revenue_eur_m": 60.0, "fiscal_year": 2025, "page": 3},
+    {"segment_name": "Wines", "revenue_eur_m": 39.0, "fiscal_year": 2025, "page": 3}
+  ],
+  "management_tone": {"label": "cautious", "rationale": "Prudent wording on H2 demand"}
+}
