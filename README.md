@@ -1,6 +1,6 @@
 # CAC 40 Luxury Valuation AI
 
-[![CI](https://github.com/GITHUB_USER/cac40-valuation-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/GITHUB_USER/cac40-valuation-ai/actions/workflows/ci.yml)
+[![CI](https://github.com/dmp009/cac40-valuation-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/dmp009/cac40-valuation-ai/actions/workflows/ci.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
@@ -182,7 +182,7 @@ Until then the base case is driven by historical averages, and the outputs say s
 Requires Python 3.11+. No API key is needed.
 
 ```bash
-git clone https://github.com/GITHUB_USER/cac40-valuation-ai.git
+git clone https://github.com/dmp009/cac40-valuation-ai.git
 cd cac40-valuation-ai
 python -m venv .venv && source .venv/bin/activate
 make install    # package + dev dependencies
