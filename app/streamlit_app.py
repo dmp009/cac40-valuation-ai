@@ -1,5 +1,6 @@
 """Streamlit valuation explorer. Reads only the committed snapshot, AI cache and quality report."""
 
+import math
 import os
 import sys
 from pathlib import Path
@@ -24,7 +25,7 @@ from cac40val.pipeline import (
 )
 from cac40val.valuation import comps
 
-st.set_page_config(page_title="CAC 40 luxury valuation", page_icon="", layout="wide")
+st.set_page_config(page_title="CAC 40 luxury valuation", page_icon=None, layout="wide")
 
 SCENARIOS = ["bear", "base", "bull"]
 LOREAL_ESSILOR = ["OR.PA", "EL.PA"]
@@ -75,6 +76,12 @@ def fmt_eur(x: float) -> str:
     return "n/a" if pd.isna(x) else f"{x:,.2f} EUR"
 
 
+def slider_bounds(v, driver: str, lo: float, hi: float) -> tuple[float, float]:
+    """Slider range (in %) wide enough for every scenario's value, so defaults are never clamped."""
+    values = [x * 100 for d in v.drivers.values() for x in getattr(d, driver)]
+    return float(min(lo, math.floor(min(values)) - 5)), float(max(hi, math.ceil(max(values)) + 5))
+
+
 def valuation_tab(v, scenario: str) -> None:
     d = v.drivers[scenario]
     st.caption(
@@ -83,13 +90,14 @@ def valuation_tab(v, scenario: str) -> None:
     )
     c1, c2 = st.columns(2)
     key = f"{v.ticker}-{scenario}"
+    g_lo, g_hi = slider_bounds(v, "revenue_growth", -20.0, 30.0)
+    m_lo, m_hi = slider_bounds(v, "ebit_margin", 0.0, 50.0)
     growth = c1.slider(
-        "Base revenue growth (% per year)", -10.0, 25.0,
-        float(min(max(d.revenue_growth[0] * 100, -10.0), 25.0)), 0.1, key=f"g-{key}",
+        "Base revenue growth (% per year)", g_lo, g_hi, d.revenue_growth[0] * 100, 0.1,
+        key=f"g-{key}",
     )  # fmt: skip
     margin = c2.slider(
-        "EBIT margin (%)", 0.0, 50.0,
-        float(min(max(d.ebit_margin[0] * 100, 0.0), 50.0)), 0.1, key=f"m-{key}",
+        "EBIT margin (%)", m_lo, m_hi, d.ebit_margin[0] * 100, 0.1, key=f"m-{key}"
     )  # fmt: skip
     live = recompute(v, scenario, growth / 100, margin / 100)
     upside = live.value_per_share / v.price - 1
@@ -102,10 +110,10 @@ def valuation_tab(v, scenario: str) -> None:
     left, right = st.columns(2)
     with left:
         st.subheader("Football field")
-        st.plotly_chart(football_chart(v.football), use_container_width=True)
+        st.plotly_chart(football_chart(v.football), width="stretch")
     with right:
         st.subheader("Sensitivity (live)")
-        st.plotly_chart(sensitivity_heatmap(live.sensitivity), use_container_width=True)
+        st.plotly_chart(sensitivity_heatmap(live.sensitivity), width="stretch")
 
     st.subheader("Scenario table")
     table = pd.DataFrame(
@@ -125,10 +133,10 @@ def valuation_tab(v, scenario: str) -> None:
                 "EBIT margin": "{:.1%}",
             }
         ),
-        use_container_width=True,
+        width="stretch",
     )
     with st.expander("Projected free cash flow (live scenario, EUR m)"):
-        st.dataframe((live.projection / 1e6).round(0), use_container_width=True)
+        st.dataframe((live.projection / 1e6).round(0), width="stretch")
 
 
 def ai_tab(v) -> None:
@@ -147,12 +155,12 @@ def ai_tab(v) -> None:
     st.subheader("Guidance")
     st.dataframe(
         pd.DataFrame([g.model_dump() for g in ex.guidance]).rename(columns={"page": "Page"}),
-        use_container_width=True, hide_index=True,
+        width="stretch", hide_index=True,
     )  # fmt: skip
     st.subheader("Risks")
     st.dataframe(
         pd.DataFrame([r.model_dump() for r in ex.risks]).rename(columns={"page": "Page"}),
-        use_container_width=True, hide_index=True,
+        width="stretch", hide_index=True,
     )  # fmt: skip
 
 
@@ -168,7 +176,7 @@ def comps_tab(v) -> None:
             {"market_cap_eur": "{:,.0f}", "ev_sales": "{:.2f}", "ev_ebitda": "{:.1f}", "pe": "{:.1f}"},
             na_rep="n/a",
         ),
-        use_container_width=True,
+        width="stretch",
     )  # fmt: skip
     st.subheader("Peer statistics")
     st.dataframe(
@@ -177,7 +185,7 @@ def comps_tab(v) -> None:
     row = v.peers[v.peers["ticker"] == v.ticker].iloc[0]
     implied = comps.implied_values(row, stats, v.shares)
     st.subheader("Implied value per share (EUR)")
-    st.dataframe(implied.style.format("{:,.2f}", na_rep="n/a"), use_container_width=True)
+    st.dataframe(implied.style.format("{:,.2f}", na_rep="n/a"), width="stretch")
 
 
 def quality_tab() -> None:
