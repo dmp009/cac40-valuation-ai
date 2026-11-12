@@ -151,7 +151,8 @@ def _company_row(con: duckdb.DuckDBPyConnection, company: Company, date: pd.Time
     """EUR-converted snapshot of a company at the valuation date (NaN where missing)."""
     fin = read_financials(con, company.ticker)
     wide = fin.pivot_table(index="fiscal_year", columns="line_item", values="value").sort_index()
-    fx_fin = _fx(con, _fin_currency(con, company.ticker, company.currency), date)
+    fin_ccy = _fin_currency(con, company.ticker, company.reporting_currency or company.currency)
+    fx_fin = _fx(con, fin_ccy, date)
     fx_px = _fx(con, company.currency, date)
     closes = con.execute(
         "SELECT close FROM fact_prices WHERE ticker = ? AND date <= ? ORDER BY date",

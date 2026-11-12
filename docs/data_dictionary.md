@@ -29,7 +29,7 @@ One row per company in `config/sources.yaml` (5 targets and 4 extra peers).
 | `ticker` | VARCHAR | Yahoo Finance ticker, e.g. `MC.PA`. Natural key. | `config/sources.yaml` | None |
 | `name` | VARCHAR | Company name | `config/sources.yaml` | None |
 | `country` | VARCHAR | Country of listing. Currently always NULL (not populated). | — | — |
-| `currency` | VARCHAR | Listing (trading) currency: EUR, CHF or HKD | `config/sources.yaml` | None |
+| `currency` | VARCHAR | Listing (trading) currency of the share price: EUR, CHF or HKD. Not necessarily the reporting currency (see `fact_financials.currency`). | `config/sources.yaml` | None |
 | `sector` | VARCHAR | Sector label | Pipeline constant | Set to `Luxury & Consumer` for all rows |
 | `is_target` | BOOLEAN | TRUE for the 5 companies valued, FALSE for comps-only peers | `config/sources.yaml` | None |
 
@@ -55,7 +55,7 @@ item. Values are in full currency units (not millions).
 | `fiscal_year` | INTEGER | Calendar year of the fiscal period end | yfinance statement column | `Timestamp(period).year` |
 | `line_item` | VARCHAR | Canonical line item (list below) | yfinance row label | Mapped by `ingest.market.LINE_ITEM_MAP`; when several labels map to one item, the first label in the map wins |
 | `value` | DOUBLE | Amount in full units of `currency` | yfinance | `capex`, `interest_expense`, `tax_expense` stored as absolute values; `nwc` computed (see below) |
-| `currency` | VARCHAR | Currency of `value` | `config/sources.yaml` | Copied from the company's configured currency (see methodology, limitations) |
+| `currency` | VARCHAR | Reporting currency of `value` (EUR for Richemont and Prada although they list in CHF and HKD) | yfinance `Ticker.info["financialCurrency"]` | Falls back to `reporting_currency`, then `currency`, in `config/sources.yaml` when yfinance does not return it; a disagreement with the config is logged |
 | `source` | VARCHAR | Data provider | Pipeline | Always `yfinance` today; reserved for overrides and filings |
 
 **Line items** (`line_item` values) and the yfinance labels they come from:

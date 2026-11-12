@@ -32,6 +32,7 @@ companies:
   - ticker: "CFR.SW"
     name: "Richemont"
     currency: CHF
+    reporting_currency: EUR
     is_target: false
     deu_url: null
     section_hints: []
@@ -44,6 +45,7 @@ companies:
   - ticker: "1913.HK"
     name: "Prada"
     currency: HKD
+    reporting_currency: EUR
     is_target: false
     deu_url: null
     section_hints: []

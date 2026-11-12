@@ -176,7 +176,11 @@ Cells where WACC ≤ g are left blank.
 (`MONC.MI`), Prada (`1913.HK`) and Brunello Cucinelli (`BC.MI`).
 
 **Currency.** Prices are converted with the EUR rate of the listing currency on the valuation
-date; financials with the EUR rate of the currency recorded in `fact_financials`.
+date; financials with the EUR rate of their reporting currency, recorded in
+`fact_financials.currency`. The two differ for Richemont (listed in CHF) and Prada (listed in
+HKD): both report in euros, so only their share prices are converted. The reporting currency
+comes from yfinance (`financialCurrency`), with `reporting_currency` in `config/sources.yaml`
+as the fallback.
 
 **Multiples** (latest fiscal year):
 
@@ -246,12 +250,6 @@ between methods is the useful output for discussion.
 - **Balance-sheet identity.** For LVMH, Kering and EssilorLuxottica, total assets differ from
   liabilities plus equity by 1–2.3% in the yfinance data (mainly how minority interests are
   classified). Flagged as warnings.
-- **Reporting vs listing currency.** The currency of `fact_financials` is taken from the
-  configured listing currency. Prada (listed in Hong Kong) and Richemont (listed in Zurich)
-  report in euros, so their financials are currently converted with the HKD and CHF rates.
-  This overstates Prada's multiples by roughly 8–9× and Richemont's by about 8%. The peer
-  median is robust to the single Prada outlier, but the upper quartile of the comps range is
-  inflated. Fix: read the reporting currency from yfinance (`financialCurrency`).
 - **Comps on the latest fiscal year.** Multiples use the latest annual figures, not a true
   trailing-twelve-months or forward figure; no consensus estimates are used.
 - **Not pure luxury.** L'Oréal (beauty) and EssilorLuxottica (eyewear and medical optics) are

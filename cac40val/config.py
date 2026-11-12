@@ -14,6 +14,9 @@ class Company:
     is_target: bool
     deu_url: str | None = None
     section_hints: list[str] = field(default_factory=list)
+    # Currency of the financial statements when it differs from the listing currency
+    # (e.g. Richemont lists in CHF and Prada in HKD, both report in EUR).
+    reporting_currency: str | None = None
 
 
 @dataclass
@@ -41,6 +44,7 @@ def load_companies(path: Path = Path("config/sources.yaml")) -> list[Company]:
             is_target=bool(c["is_target"]),
             deu_url=c.get("deu_url"),
             section_hints=list(c.get("section_hints") or []),
+            reporting_currency=c.get("reporting_currency"),
         )
         for c in data["companies"]
     ]

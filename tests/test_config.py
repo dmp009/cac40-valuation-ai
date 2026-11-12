@@ -32,3 +32,11 @@ def test_overrides_missing_file_returns_empty(tmp_path):
 def test_overrides_reads_yaml(tmp_path):
     (tmp_path / "MC.PA.yaml").write_text("wacc: 0.08\n")
     assert load_overrides("MC.PA", tmp_path) == {"wacc": 0.08}
+
+
+def test_reporting_currency_for_eur_reporters_listed_abroad():
+    by_ticker = {c.ticker: c for c in load_companies()}
+    assert by_ticker["CFR.SW"].reporting_currency == "EUR"
+    assert by_ticker["1913.HK"].reporting_currency == "EUR"
+    assert by_ticker["CFR.SW"].currency == "CHF"
+    assert by_ticker["MC.PA"].reporting_currency is None

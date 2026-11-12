@@ -140,3 +140,29 @@ def test_outputs_and_snapshot(con, tmp_path):
     snap = load_snapshot(tmp_path / "snap")
     n = snap.execute("SELECT count(*) FROM fact_prices").fetchone()[0]
     assert n == con.execute("SELECT count(*) FROM fact_prices").fetchone()[0]
+
+
+def test_listing_currency_converts_price_but_not_eur_financials(con):
+    """HKD-listed peer reporting in EUR: price uses HKD FX, financials stay in EUR."""
+    upsert(con, "fact_financials", _financials("HKP", 1.0))  # currency EUR
+    upsert(con, "fact_prices", _prices("HKP", 7))
+    upsert(
+        con,
+        "fact_fx",
+        pd.DataFrame(
+            {
+                "date": [pd.Timestamp("2026-11-10").date()],
+                "currency": ["HKD"],
+                "eur_per_unit": [0.1],
+            }
+        ),
+    )
+    peer = Company("HKP", "HKP", "HKD", False, reporting_currency="EUR")
+    mult = build_multiples(con, [*COMPANIES, peer], pd.Timestamp("2026-11-10"))
+    row = mult[mult["ticker"] == "HKP"].iloc[0]
+    close = con.execute(
+        "SELECT close FROM fact_prices WHERE ticker='HKP' ORDER BY date DESC LIMIT 1"
+    ).fetchone()[0]
+    assert row["price_eur"] == pytest.approx(close * 0.1)
+    assert row["revenue_eur"] == pytest.approx(1000 * 1.05**3)
+    assert row["fx_fin"] == 1.0

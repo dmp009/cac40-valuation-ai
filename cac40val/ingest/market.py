@@ -120,11 +120,42 @@ def fetch_prices(ticker: str, period: str = "5y") -> pd.DataFrame:
     return out.dropna(subset=["close"]).reset_index(drop=True)
 
 
+def _financial_currency(t, company: Company) -> str:
+    """Reporting currency of the statements: yfinance ``financialCurrency``, else config.
+
+    The listing currency (``company.currency``) is only the last resort: Richemont (CHF) and
+    Prada (HKD) are listed abroad but report in EUR.
+    """
+    configured = company.reporting_currency or company.currency
+    try:
+        reported = (t.info or {}).get("financialCurrency")
+    except Exception as exc:  # noqa: BLE001 - yfinance .info is a fragile scrape
+        logger.warning(
+            "%s: financialCurrency unavailable (%s); using %s", company.ticker, exc, configured
+        )
+        return configured
+    if not reported:
+        return configured
+    if reported != configured:
+        logger.warning(
+            "%s: yfinance financialCurrency %s disagrees with configured %s; using %s",
+            company.ticker,
+            reported,
+            configured,
+            reported,
+        )
+    return str(reported)
+
+
 def fetch_company(company: Company) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return (financials long, prices) for a company. Missing items are simply absent."""
+    """Return (financials long, prices) for a company. Missing items are simply absent.
+
+    Financials carry the reporting currency; prices stay in the listing currency.
+    """
     import yfinance as yf
 
     t = yf.Ticker(company.ticker)
+    fin_ccy = _financial_currency(t, company)
     frames = []
     for name, stmt in (
         ("income", t.financials),
@@ -134,7 +165,7 @@ def fetch_company(company: Company) -> tuple[pd.DataFrame, pd.DataFrame]:
         if stmt is None or stmt.empty:
             continue
         save_raw(f"yfinance_{name}", stmt.to_csv(), "csv")
-        frames.append(normalize_statements(stmt, company.ticker, company.currency))
+        frames.append(normalize_statements(stmt, company.ticker, fin_ccy))
     fin = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=FIN_COLUMNS)
     # first statement wins on duplicates (income before balance before cash flow)
     fin = fin.drop_duplicates(["ticker", "fiscal_year", "line_item"]).reset_index(drop=True)
