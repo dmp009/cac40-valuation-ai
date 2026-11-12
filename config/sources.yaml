@@ -1,0 +1,55 @@
+companies:
+  - ticker: "MC.PA"
+    name: "LVMH"
+    currency: EUR
+    is_target: true
+    deu_url: null
+    section_hints: []
+  - ticker: "RMS.PA"
+    name: "Hermès"
+    currency: EUR
+    is_target: true
+    deu_url: null
+    section_hints: []
+  - ticker: "KER.PA"
+    name: "Kering"
+    currency: EUR
+    is_target: true
+    deu_url: null
+    section_hints: []
+  - ticker: "OR.PA"
+    name: "L'Oréal"
+    currency: EUR
+    is_target: true
+    deu_url: null
+    section_hints: []
+  - ticker: "EL.PA"
+    name: "EssilorLuxottica"
+    currency: EUR
+    is_target: true
+    deu_url: null
+    section_hints: []
+  - ticker: "CFR.SW"
+    name: "Richemont"
+    currency: CHF
+    is_target: false
+    deu_url: null
+    section_hints: []
+  - ticker: "MONC.MI"
+    name: "Moncler"
+    currency: EUR
+    is_target: false
+    deu_url: null
+    section_hints: []
+  - ticker: "1913.HK"
+    name: "Prada"
+    currency: HKD
+    is_target: false
+    deu_url: null
+    section_hints: []
+  - ticker: "BC.MI"
+    name: "Brunello Cucinelli"
+    currency: EUR
+    is_target: false
+    deu_url: null
+    section_hints: []

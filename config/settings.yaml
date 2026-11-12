@@ -1,0 +1,6 @@
+llm_model: claude-sonnet-5-5
+tax_rate: 0.258
+terminal_growth: 0.02
+rf_override: null
+erp_override: null
+benchmark_ticker: "^STOXX50E"

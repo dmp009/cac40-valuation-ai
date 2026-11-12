@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cac40val"
+version = "0.1.0"
+description = "DCF, trading comps and LLM extraction for CAC 40 luxury companies"
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml",
+    "pandas",
+    "numpy",
+    "yfinance",
+    "duckdb",
+    "pymupdf",
+    "pydantic>=2",
+    "anthropic",
+    "openpyxl",
+    "streamlit",
+    "plotly",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.setuptools.packages.find]
+include = ["cac40val*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
