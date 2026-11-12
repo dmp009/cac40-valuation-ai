@@ -1,11 +1,12 @@
 """Historical drivers, scenario construction and 5-year projection (no I/O)."""
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import pandas as pd
 
-from cac40val.valuation.dcf import fcff
+from cac40val.valuation.dcf import fcff, normalized_terminal_fcff
 
 CANONICAL_ITEMS = [
     "revenue",
@@ -153,3 +154,16 @@ def project(last_revenue: float, d: Drivers) -> pd.DataFrame:
         )
         prev_nwc = nwc
     return pd.DataFrame(rows, index=range(1, len(rows) + 1))
+
+
+def terminal_fcff_fn(proj: pd.DataFrame, d: Drivers) -> Callable[[float], float]:
+    """Year-6 FCFF as a function of terminal growth g, from year-5 revenue and drivers."""
+    revenue_n = float(proj["revenue"].iloc[-1])
+    margin_n = float(d.ebit_margin[-1])
+
+    def terminal_fcff(g: float) -> float:
+        return normalized_terminal_fcff(
+            revenue_n, margin_n, d.tax_rate, d.da_pct, d.capex_pct, d.nwc_pct, g
+        )
+
+    return terminal_fcff

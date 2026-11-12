@@ -121,3 +121,16 @@ def test_year1_delta_nwc_uses_driver_basis_not_actual_level():
     rev1 = df.loc[1, "revenue"]
     assert df.loc[1, "delta_nwc"] == pytest.approx(rev1 * 0.10 - 100 * 0.10)
     assert df.loc[1, "delta_nwc"] == pytest.approx(0.10 * (rev1 - 100))
+
+
+def test_terminal_fcff_fn_uses_year5_levels():
+    from cac40val.valuation.dcf import normalized_terminal_fcff
+    from cac40val.valuation.forecast import terminal_fcff_fn
+
+    d = Drivers([0.10] * 5, [0.20, 0.21, 0.22, 0.23, 0.24], 0.05, 0.06, 0.10, 0.25, {})
+    df = project(100, d)
+    tf = terminal_fcff_fn(df, d)
+    rev5 = df.loc[5, "revenue"]
+    assert tf(0.02) == pytest.approx(
+        normalized_terminal_fcff(rev5, 0.24, 0.25, 0.05, 0.06, 0.10, 0.02)
+    )

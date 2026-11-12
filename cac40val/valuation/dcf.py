@@ -1,6 +1,6 @@
 """Discounted cash flow engine (end-of-year convention, no I/O)."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 import numpy as np
 import pandas as pd
@@ -29,15 +29,61 @@ def gordon_terminal_value(last_fcff: float, rate: float, g: float) -> float:
     return last_fcff * (1 + g) / (rate - g)
 
 
+def normalized_terminal_fcff(
+    revenue_n: float,
+    ebit_margin_n: float,
+    tax_rate: float,
+    da_pct: float,
+    capex_pct: float,
+    nwc_pct: float,
+    g: float,
+) -> float:
+    """Year n+1 FCFF consistent with steady growth g (the cash flow the Gordon model needs).
+
+    Revenue grows at g, margins and ratios stay at their year-n levels, and the NWC investment
+    is the one growth at g requires, nwc_pct x (revenue_{n+1} - revenue_n), instead of the
+    explicit-period change carried by FCFF_n x (1 + g).
+    """
+    revenue_next = revenue_n * (1 + g)
+    return (
+        revenue_next * ebit_margin_n * (1 - tax_rate)
+        + revenue_next * (da_pct - capex_pct)
+        - nwc_pct * (revenue_next - revenue_n)
+    )
+
+
+def terminal_value(
+    fcffs: Sequence[float],
+    rate: float,
+    g: float,
+    terminal_fcff: Callable[[float], float] | None = None,
+) -> float:
+    """Gordon terminal value at year n.
+
+    With ``terminal_fcff`` (a function of g returning year n+1 FCFF) TV = FCFF_{n+1} / (r - g);
+    without it, FCFF_{n+1} = FCFF_n x (1 + g).
+    """
+    if terminal_fcff is None:
+        return gordon_terminal_value(fcffs[-1], rate, g)
+    if rate - g < MIN_SPREAD:
+        raise ValueError(f"Discount rate ({rate}) must exceed terminal growth ({g})")
+    return terminal_fcff(g) / (rate - g)
+
+
 def exit_multiple_terminal_value(last_ebitda: float, multiple: float) -> float:
     """Terminal value at year n from an EV/EBITDA exit multiple."""
     return last_ebitda * multiple
 
 
-def enterprise_value(fcffs: Sequence[float], rate: float, g: float) -> float:
+def enterprise_value(
+    fcffs: Sequence[float],
+    rate: float,
+    g: float,
+    terminal_fcff: Callable[[float], float] | None = None,
+) -> float:
     """PV of explicit FCFFs plus the Gordon terminal value discounted n years."""
     n = len(fcffs)
-    tv = gordon_terminal_value(fcffs[-1], rate, g)
+    tv = terminal_value(fcffs, rate, g, terminal_fcff)
     return discount(fcffs, rate) + tv / (1 + rate) ** n
 
 
@@ -56,6 +102,7 @@ def sensitivity_grid(
     shares: float,
     minorities: float = 0.0,
     associates: float = 0.0,
+    terminal_fcff: Callable[[float], float] | None = None,
 ) -> pd.DataFrame:
     """Per-share value across rate (rows) and terminal growth (columns) offsets."""
     rates = [base_rate + d for d in RATE_OFFSETS]
@@ -65,6 +112,6 @@ def sensitivity_grid(
         for j, g in enumerate(gs):
             if r - g < MIN_SPREAD:
                 continue
-            ev = enterprise_value(fcffs, r, g)
+            ev = enterprise_value(fcffs, r, g, terminal_fcff)
             values[i, j] = equity_bridge(ev, net_debt, minorities, associates) / shares
     return pd.DataFrame(values, index=rates, columns=gs)

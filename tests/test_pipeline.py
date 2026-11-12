@@ -60,8 +60,8 @@ def _financials(ticker: str, scale: float) -> pd.DataFrame:
     )
 
 
-@pytest.fixture
-def con():
+def seed_db():
+    """In-memory warehouse with 4 EUR companies, a benchmark and market params."""
     c = connect(":memory:")
     for i, t in enumerate(TICKERS):
         upsert(c, "fact_financials", _financials(t, 1.0 + 0.2 * i))
@@ -79,6 +79,11 @@ def con():
         ),
     )
     return c
+
+
+@pytest.fixture
+def con():
+    return seed_db()
 
 
 def _value(con, extraction=None):
@@ -166,3 +171,45 @@ def test_listing_currency_converts_price_but_not_eur_financials(con):
     assert row["price_eur"] == pytest.approx(close * 0.1)
     assert row["revenue_eur"] == pytest.approx(1000 * 1.05**3)
     assert row["fx_fin"] == 1.0
+
+
+def test_value_company_uses_normalized_terminal_fcff(con):
+    from cac40val.valuation import dcf
+
+    v = _value(con)
+    base, d = v.projections["base"], v.drivers["base"]
+
+    def tf(g):
+        return dcf.normalized_terminal_fcff(
+            base["revenue"].iloc[-1], d.ebit_margin[-1], d.tax_rate,
+            d.da_pct, d.capex_pct, d.nwc_pct, g,
+        )  # fmt: skip
+
+    fcffs = list(base["fcff"])
+    tv = tf(v.g) / (v.wacc - v.g)
+    ev = dcf.discount(fcffs, v.wacc) + tv / (1 + v.wacc) ** 5
+    assert v.ev_base == pytest.approx(ev)
+    per_share = dcf.equity_bridge(ev, v.net_debt, v.minorities, v.associates) / v.shares
+    assert v.scenarios["base"] == pytest.approx(per_share)
+    assert v.sensitivity.iloc[2, 2] == pytest.approx(per_share)
+    exit_tv = base["ebitda"].iloc[-1] * comps_median(v)
+    assert v.tv_gordon_vs_exit_gap == pytest.approx((tv - exit_tv) / exit_tv)
+
+
+def comps_median(v):
+    from cac40val.valuation import comps
+
+    return comps.peer_stats(v.peers, exclude=[v.ticker]).loc["ev_ebitda", "median"]
+
+
+def test_year1_delta_nwc_ignores_actual_nwc_level(con):
+    # Seeded actual NWC is 10% of revenue; make the latest year an outlier at 30%.
+    con.execute(
+        "UPDATE fact_financials SET value = value * 3 "
+        "WHERE ticker = 'TGT' AND line_item = 'nwc' AND fiscal_year = 2025"
+    )
+    v = _value(con)
+    base, d = v.projections["base"], v.drivers["base"]
+    expected = d.nwc_pct * (base["revenue"].iloc[0] - v.last_revenue)
+    assert base["delta_nwc"].iloc[0] == pytest.approx(expected)
+    assert v.last_nwc != pytest.approx(v.last_revenue * d.nwc_pct)

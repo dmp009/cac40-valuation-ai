@@ -7,7 +7,7 @@ import pytest
 from cac40val.ai_extraction.models import Extraction, GuidanceItem, ManagementTone, RiskItem
 from cac40val.pipeline import CompanyValuation
 from cac40val.valuation import comps, dcf, wacc
-from cac40val.valuation.forecast import Drivers, project
+from cac40val.valuation.forecast import Drivers, project, terminal_fcff_fn
 
 SHARES, NET_DEBT, MINOR, ASSOC = 500e6, 2e9, 1e8, 5e7
 LAST_REV, LAST_NWC, PRICE = 80e9, 8e9, 100.0
@@ -26,9 +26,10 @@ def make_valuation(extraction=None) -> CompanyValuation:
     proj = project(LAST_REV, d)
     rate = wacc.wacc(50e9, 10e9, 0.08, 0.03, 0.25)
     g = 0.02
-    ev = dcf.enterprise_value(list(proj["fcff"]), rate, g)
+    tf = terminal_fcff_fn(proj, d)
+    ev = dcf.enterprise_value(list(proj["fcff"]), rate, g, tf)
     base = dcf.equity_bridge(ev, NET_DEBT, MINOR, ASSOC) / SHARES
-    sens = dcf.sensitivity_grid(list(proj["fcff"]), rate, g, NET_DEBT, SHARES, MINOR, ASSOC)
+    sens = dcf.sensitivity_grid(list(proj["fcff"]), rate, g, NET_DEBT, SHARES, MINOR, ASSOC, tf)
     football = comps.football_field((base * 0.8, base * 1.2), (90.0, 130.0), (80.0, 120.0), PRICE)
     implied = pd.DataFrame(
         {"low": [1.0, 2.0, math.nan], "mid": [2.0, 3.0, 4.0], "high": [3.0, 4.0, 5.0]},

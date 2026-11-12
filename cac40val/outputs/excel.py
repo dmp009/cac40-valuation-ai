@@ -26,6 +26,13 @@ VERDICT_FORMULA = (
     f'IF(B3<B4*{OVERVALUED_BELOW},"Overvalued","Fairly valued"))'
 )
 YEARS = "BCDEF"
+# Gordon TV on a normalised year-6 FCFF: Y5 revenue grown at g, Y5 EBIT margin, D&A/capex
+# ratios, and the NWC investment growth at g needs (NWC% x Y5 revenue x g). Mirrors
+# cac40val.valuation.dcf.normalized_terminal_fcff.
+TV_FORMULA = (
+    "=(F4*(1+Assumptions!B12)*(Assumptions!F7*(1-Assumptions!B11)+Assumptions!B8"
+    "-Assumptions!B9)-Assumptions!B10*F4*Assumptions!B12)/(WACC!B15-Assumptions!B12)"
+)
 
 
 def _clean(x):
@@ -180,7 +187,7 @@ def _dcf(wb, v):
         _put(ws, f"{col}12", f"={col}10*{col}11", MN)
     summary = [
         (14, "Sum of PV of FCFF", "=SUM(B12:F12)", MN),
-        (15, "Terminal value (Gordon)", "=F10*(1+Assumptions!B12)/(WACC!B15-Assumptions!B12)", MN),
+        (15, "Terminal value (Gordon, normalised Y6 FCFF)", TV_FORMULA, MN),
         (16, "PV of terminal value", "=B15*F11", MN),
         (17, "Enterprise value", "=B14+B16", MN),
         (18, "Net debt", "=Assumptions!B13", MN),
@@ -298,5 +305,8 @@ def write_excel(v, path: Path) -> Path:
     _sensitivity(wb, v)
     _comps(wb, v)
     _summary(wb, v)
+    # openpyxl stores formulas without cached results: force Excel/LibreOffice to recalculate
+    # on open so viewers never see empty cells.
+    wb.calculation.fullCalcOnLoad = True
     wb.save(path)
     return path

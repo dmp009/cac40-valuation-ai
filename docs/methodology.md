@@ -132,9 +132,23 @@ a memo line.
 
 ## 6. Terminal value and enterprise value
 
-**Gordon growth (used in the valuation).**
+**Gordon growth (used in the valuation).** The terminal value capitalises a normalised
+year-6 cash flow, not FCFF_5 grown at g:
 
-    TV = FCFF_5 × (1 + g) / (WACC − g)        (requires WACC > g)
+    Revenue_6 = Revenue_5 × (1 + g)
+    FCFF_6    = Revenue_6 × margin_5 × (1 − t) + Revenue_6 × (D&A% − capex%)
+                − NWC% × (Revenue_6 − Revenue_5)
+    TV        = FCFF_6 / (WACC − g)        (requires WACC − g ≥ 1e-6)
+
+FCFF_5 carries the NWC investment of the explicit period, sized for that period's growth
+rate. In perpetuity the business only grows at g, so it only needs NWC% × Revenue_5 × g of
+new working capital each year. Using FCFF_5 × (1 + g) would understate the terminal value
+when explicit growth is above g (the usual case) and overstate it when explicit growth is
+negative (Kering's bear case). With no NWC the two formulas are identical. No floor of capex
+at D&A is imposed in the terminal year; the historical ratios are kept.
+
+The same normalised FCFF_6 is used in the sensitivity grid (recomputed for each g), the live
+app and the Excel model (`DCF!B15`).
 
 **Enterprise value** (end-of-year discounting):
 

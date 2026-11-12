@@ -22,7 +22,13 @@ from cac40val.config import (
     load_settings,
 )
 from cac40val.valuation import comps, dcf, wacc
-from cac40val.valuation.forecast import Drivers, build_scenarios, historical_drivers, project
+from cac40val.valuation.forecast import (
+    Drivers,
+    build_scenarios,
+    historical_drivers,
+    project,
+    terminal_fcff_fn,
+)
 from cac40val.warehouse.db import connect, read_financials, read_prices, upsert
 from cac40val.warehouse.quality import run_quality_checks, write_quality_report
 
@@ -294,20 +300,21 @@ def value_company(
     minorities = float(row["minorities_eur"])
     associates = float(row["associates_eur"])
     net_debt = float(row["net_debt_eur"])
-    evs, scenarios = {}, {}
+    evs, scenarios, terminals = {}, {}, {}
     for name, proj in projections.items():
-        evs[name] = dcf.enterprise_value(list(proj["fcff"]), rate, g)
+        terminals[name] = terminal_fcff_fn(proj, drivers[name])
+        evs[name] = dcf.enterprise_value(list(proj["fcff"]), rate, g, terminals[name])
         scenarios[name] = dcf.equity_bridge(evs[name], net_debt, minorities, associates) / shares
     base = projections["base"]
     sens = dcf.sensitivity_grid(
-        list(base["fcff"]), rate, g, net_debt, shares, minorities, associates
+        list(base["fcff"]), rate, g, net_debt, shares, minorities, associates, terminals["base"]
     )
 
     # --- comps (peer set = everyone but the target)
     stats = comps.peer_stats(peers_multiples, exclude=[ticker])
     implied = comps.implied_values(row, stats, shares)
     median_mult = stats.loc["ev_ebitda", "median"]
-    tv_gordon = dcf.gordon_terminal_value(float(base["fcff"].iloc[-1]), rate, g)
+    tv_gordon = dcf.terminal_value(list(base["fcff"]), rate, g, terminals["base"])
     if pd.notna(median_mult):
         tv_exit = dcf.exit_multiple_terminal_value(float(base["ebitda"].iloc[-1]), median_mult)
         gap = (tv_gordon - tv_exit) / tv_exit if tv_exit else math.nan
