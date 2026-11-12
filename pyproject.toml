@@ -9,6 +9,8 @@ description = "DCF, trading comps and LLM extraction for CAC 40 luxury companies
 requires-python = ">=3.11"
 dependencies = [
     "pyyaml",
+    "requests",
+    "pandera",
     "pandas",
     "numpy",
     "yfinance",
