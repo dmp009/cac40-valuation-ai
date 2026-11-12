@@ -213,3 +213,27 @@ def test_year1_delta_nwc_ignores_actual_nwc_level(con):
     expected = d.nwc_pct * (base["revenue"].iloc[0] - v.last_revenue)
     assert base["delta_nwc"].iloc[0] == pytest.approx(expected)
     assert v.last_nwc != pytest.approx(v.last_revenue * d.nwc_pct)
+
+
+def test_run_extractions_survives_a_failing_company(con, monkeypatch, caplog):
+    import logging
+
+    from cac40val import pipeline
+
+    good = Extraction(
+        ticker="P1", fiscal_year=2025, model="m",
+        extracted_at=pd.Timestamp("2026-01-01").to_pydatetime(),
+        guidance=[], risks=[], segments=[],
+    )  # fmt: skip
+
+    def fake(company, fy, *, refresh, client):
+        if company.ticker == "TGT":
+            raise RuntimeError("API error 529")
+        return good
+
+    monkeypatch.setattr(pipeline, "get_extraction", fake)
+    targets = [COMPANIES[0], COMPANIES[1]]
+    with caplog.at_level(logging.ERROR):
+        out = pipeline.run_extractions(con, targets, refresh=False, client=None)
+    assert out == {"TGT": None, "P1": good}
+    assert "AI extraction failed for TGT" in caplog.text

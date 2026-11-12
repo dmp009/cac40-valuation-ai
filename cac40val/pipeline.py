@@ -496,6 +496,32 @@ def _ingest(con: duckdb.DuckDBPyConnection, companies: list[Company], settings: 
     )
 
 
+# ---------------------------------------------------------------- AI extraction
+
+
+def run_extractions(
+    con: duckdb.DuckDBPyConnection, targets: list[Company], *, refresh: bool, client
+) -> dict[str, Extraction | None]:
+    """Cached or fresh extraction per target; one company's failure never aborts the run."""
+    extractions: dict[str, Extraction | None] = {}
+    for c in targets:
+        row = con.execute(
+            "SELECT max(fiscal_year) FROM fact_financials WHERE ticker = ?", [c.ticker]
+        ).fetchone()
+        if row is None or row[0] is None:
+            extractions[c.ticker] = None
+            continue
+        try:
+            ex = get_extraction(c, int(row[0]), refresh=refresh, client=client)
+        except Exception:
+            logger.exception("AI extraction failed for %s; continuing without guidance", c.ticker)
+            ex = None
+        if ex is not None:
+            upsert(con, "fact_ai_extraction", to_rows(ex))
+        extractions[c.ticker] = ex
+    return extractions
+
+
 # ---------------------------------------------------------------- main
 
 
@@ -524,18 +550,7 @@ def main(argv: list[str] | None = None) -> int:
     targets = [
         c for c in companies if c.is_target and (not args.tickers or c.ticker in args.tickers)
     ]
-    extractions: dict[str, Extraction | None] = {}
-    for c in targets:
-        row = con.execute(
-            "SELECT max(fiscal_year) FROM fact_financials WHERE ticker = ?", [c.ticker]
-        ).fetchone()
-        if row is None or row[0] is None:
-            extractions[c.ticker] = None
-            continue
-        ex = get_extraction(c, int(row[0]), refresh=args.refresh, client=client)
-        if ex is not None:
-            upsert(con, "fact_ai_extraction", to_rows(ex))
-        extractions[c.ticker] = ex
+    extractions = run_extractions(con, targets, refresh=args.refresh, client=client)
     if args.only_ai:
         return 0
 

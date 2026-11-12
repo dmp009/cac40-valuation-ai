@@ -119,7 +119,10 @@ def get_extraction(
 ) -> Extraction | None:
     cache_file = cache_dir / f"{company.ticker}_{fiscal_year}.json"
     if cache_file.exists() and not refresh:
-        return Extraction.model_validate_json(cache_file.read_text(encoding="utf-8"))
+        try:
+            return Extraction.model_validate_json(cache_file.read_text(encoding="utf-8"))
+        except (ValueError, OSError) as exc:  # pydantic ValidationError is a ValueError
+            logger.warning("Ignoring unreadable AI cache %s: %s", cache_file, exc)
     if not refresh or client is None:
         _no_cache(company.ticker)
         return None

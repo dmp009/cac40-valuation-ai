@@ -210,3 +210,19 @@ def test_prompt_v2_marks_page_text_untrusted():
     text = PROMPT_PATH.read_text(encoding="utf-8")
     assert PROMPT_PATH.name == "extract_v2.md"
     assert "untrusted" in text and "number" in text
+
+
+def test_corrupt_cache_is_ignored_with_warning(tmp_path, caplog):
+    (tmp_path / "MC.PA_2025.json").write_text("{not json")
+    with caplog.at_level(logging.WARNING):
+        got = get_extraction(CO, 2025, refresh=False, client=BoomClient(), cache_dir=tmp_path)
+    assert got is None
+    assert "Ignoring unreadable AI cache" in caplog.text
+
+
+def test_cache_with_invalid_schema_is_ignored(tmp_path, caplog):
+    (tmp_path / "MC.PA_2025.json").write_text('{"ticker": "MC.PA"}')
+    with caplog.at_level(logging.WARNING):
+        got = get_extraction(CO, 2025, refresh=False, client=None, cache_dir=tmp_path)
+    assert got is None
+    assert "Ignoring unreadable AI cache" in caplog.text
