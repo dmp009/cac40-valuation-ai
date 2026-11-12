@@ -60,11 +60,11 @@ by `make readme`.
 <!-- RESULTS:START -->
 | Company | Ticker | Price € | Bear / Base / Bull € | Upside (base) | WACC | Verdict |
 |---|---|--:|--:|--:|--:|---|
-| LVMH | `MC.PA` | 404.70 | 275 / **339** / 415 | -16.1% | 9.84% | Overvalued |
-| Hermès | `RMS.PA` | 1,352.50 | 735 / **848** / 978 | -37.3% | 11.32% | Overvalued |
-| Kering | `KER.PA` | 189.24 | 16 / **49** / 88 | -74.3% | 8.01% | Overvalued |
-| L'Oréal | `OR.PA` | 446.85 | 164 / **206** / 257 | -53.8% | 8.92% | Overvalued |
-| EssilorLuxottica | `EL.PA` | 179.90 | 116 / **151** / 192 | -16.3% | 8.17% | Overvalued |
+| LVMH | `MC.PA` | 404.70 | 264 / **335** / 418 | -17.3% | 9.84% | Overvalued |
+| Hermès | `RMS.PA` | 1,352.50 | 731 / **847** / 980 | -37.4% | 11.32% | Overvalued |
+| Kering | `KER.PA` | 189.24 | 1 / **34** / 76 | -81.8% | 8.01% | Overvalued |
+| L'Oréal | `OR.PA` | 446.85 | 165 / **208** / 259 | -53.4% | 8.92% | Overvalued |
+| EssilorLuxottica | `EL.PA` | 179.90 | 114 / **150** / 194 | -16.4% | 8.17% | Overvalued |
 <!-- RESULTS:END -->
 
 **How to read these numbers.** All five DCF values sit below the market price. That is a
