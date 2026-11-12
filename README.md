@@ -126,6 +126,10 @@ DEU into structured, verifiable facts.
 
 - **Targeted input.** Pages are located by keywords (*perspectives*, *facteurs de risque*,
   *information sectorielle*, ...) and capped at 150,000 characters to control cost.
+- **Document text is untrusted.** Each page is wrapped in its own
+  `<page number="N">` element, with any page tags or markers inside the text escaped, and the
+  prompt (`prompts/extract_v2.md`) tells the model to ignore instructions found in the pages
+  and to cite N from the element's attribute.
 - **Structured output.** The model must answer through a tool whose input schema is a pydantic
   model. Each item is validated on its own; invalid items are dropped and counted.
 - **Mandatory citations.** Every guidance, risk and segment item must carry a page number, and

@@ -11,7 +11,7 @@ from cac40val.config import Settings
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = Path(__file__).parent / "prompts" / "extract_v1.md"
+PROMPT_PATH = Path(__file__).parent / "prompts" / "extract_v2.md"
 TOOL_NAME = "record_extraction"
 
 

@@ -1,6 +1,7 @@
 """Orchestration: locate sections, call the LLM, validate item by item, cache."""
 
 import logging
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -79,6 +80,16 @@ def segment_check(ex: Extraction, total_revenue_eur_m: float, tol: float = 0.02)
     return abs(total - total_revenue_eur_m) <= tol * total_revenue_eur_m
 
 
+_PAGE_TAG = re.compile(r"<(/?)(page)", flags=re.IGNORECASE)
+_LEGACY_MARKER = re.compile(r"\[(page) ", flags=re.IGNORECASE)
+
+
+def _escape_page_text(text: str) -> str:
+    """Neutralise anything in untrusted page text that could open or close a page block."""
+    text = _PAGE_TAG.sub(lambda m: f"&lt;{m.group(1)}{m.group(2)}", text)
+    return _LEGACY_MARKER.sub(lambda m: f"({m.group(1)} ", text)
+
+
 def _build_prompt(pages: list[tuple[int, str]]) -> tuple[str, set[int]]:
     parts = [PROMPT_PATH.read_text(encoding="utf-8")]
     used = 0
@@ -87,7 +98,7 @@ def _build_prompt(pages: list[tuple[int, str]]) -> tuple[str, set[int]]:
         if used + len(text) > MAX_CHARS:
             logger.warning("Located text exceeds %d chars; truncating from page %d", MAX_CHARS, n)
             break
-        parts.append(f"[page {n}]\n{text}")
+        parts.append(f'<page number="{n}">\n{_escape_page_text(text)}\n</page>')
         used += len(text)
         sent.add(n)
     return "\n\n".join(parts), sent

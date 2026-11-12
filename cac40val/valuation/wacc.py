@@ -9,9 +9,7 @@ def regress_beta(stock_returns: pd.Series, index_returns: pd.Series) -> float:
     """OLS slope of stock returns on index returns over aligned, non-null pairs."""
     pairs = pd.concat([stock_returns, index_returns], axis=1, join="inner").dropna()
     if len(pairs) < MIN_BETA_OBSERVATIONS:
-        raise ValueError(
-            f"Need at least {MIN_BETA_OBSERVATIONS} return pairs, got {len(pairs)}"
-        )
+        raise ValueError(f"Need at least {MIN_BETA_OBSERVATIONS} return pairs, got {len(pairs)}")
     stock, index = pairs.iloc[:, 0], pairs.iloc[:, 1]
     var = index.var()
     if var == 0:
