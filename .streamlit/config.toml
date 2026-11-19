@@ -1,0 +1,49 @@
+# Portfolio theme, shared by the three Streamlit apps (cac40-valuation-ai, goal-based-wealth-advisor,
+# sec-filings-ai-analyst). Light only: the plotly charts in app/charts.py use the same fixed palette.
+# Sober palette (no single corporate brand): black, white and navy for the interface; deep blue and a
+# muted gold lead the charts. The 8-colour categorical order passes the dataviz palette validator
+# (light mode); do not reorder it.
+
+[theme]
+base = "light"
+primaryColor = "#0F2A4A"
+linkColor = "#2558A8"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F5F7"
+textColor = "#0B0D10"
+borderColor = "#E5E7EB"
+codeBackgroundColor = "#F4F5F7"
+codeTextColor = "#374151"
+font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap"
+codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+baseFontSize = 15
+headingFontSizes = ["2.1rem", "1.5rem", "1.2rem", "1rem", "0.9rem", "0.8rem"]
+headingFontWeights = [800, 700, 600, 600, 600, 600]
+metricValueFontSize = "1.9rem"
+metricValueFontWeight = 700
+baseRadius = "10px"
+buttonRadius = "8px"
+linkUnderline = false
+showSidebarBorder = true
+greenColor = "#1F9D55"
+redColor = "#C2362B"
+orangeColor = "#B7791F"
+blueColor = "#2558A8"
+grayColor = "#6B7280"
+chartCategoricalColors = ["#2558A8", "#B7791F", "#1F9D55", "#7C3AED", "#C2362B", "#0E9AA7", "#E8590C", "#DB2777"]
+chartSequentialColors = ["#EEF2F8", "#D3DEEC", "#B3C6DF", "#8FAACF", "#6B8EBF", "#4872AE", "#2558A8", "#1C4682", "#14355F", "#0B1F3A"]
+dataframeBorderColor = "#E5E7EB"
+dataframeHeaderBackgroundColor = "#0F2A4A"
+dataframeHeaderTextColor = "#FFFFFF"
+paddingTop = "1.5rem"
+
+[theme.sidebar]
+backgroundColor = "#0B0D10"
+secondaryBackgroundColor = "#1A1E25"
+codeBackgroundColor = "#1A1E25"
+codeTextColor = "#E5E7EB"
+textColor = "#E5E7EB"
+borderColor = "#2A2E35"
+primaryColor = "#8FB3E0"
+linkColor = "#8FB3E0"

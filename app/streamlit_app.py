@@ -25,7 +25,7 @@ from cac40val.pipeline import (
 )
 from cac40val.valuation import comps
 
-st.set_page_config(page_title="CAC 40 luxury valuation", page_icon=None, layout="wide")
+st.set_page_config(page_title="CAC 40 luxury valuation", page_icon=":material/diamond:", layout="wide")
 
 SCENARIOS = ["bear", "base", "bull"]
 LOREAL_ESSILOR = ["OR.PA", "EL.PA"]
@@ -101,7 +101,7 @@ def valuation_tab(v, scenario: str) -> None:
     )  # fmt: skip
     live = recompute(v, scenario, growth / 100, margin / 100)
     upside = live.value_per_share / v.price - 1
-    m1, m2, m3, m4 = st.columns(4)
+    m1, m2, m3, m4 = st.columns(4, border=True)
     m1.metric("Current price", fmt_eur(v.price))
     m2.metric(f"DCF value ({scenario}, live)", fmt_eur(live.value_per_share), f"{upside:+.1%}")
     m3.metric("WACC", f"{v.wacc:.2%}")
@@ -142,7 +142,7 @@ def valuation_tab(v, scenario: str) -> None:
 def ai_tab(v) -> None:
     ex = v.extraction
     if ex is None:
-        st.info("No AI extraction available for this company.")
+        st.caption("No AI extraction available for this company.")
         return
     st.caption(f"Extracted from the FY{ex.fiscal_year} registration document by `{ex.model}`.")
     c1, c2 = st.columns(2)
@@ -196,7 +196,7 @@ def quality_tab() -> None:
 def main() -> None:
     companies = [c for c in get_companies() if c.is_target]
     names = {c.ticker: c.name for c in companies}
-    st.title("CAC 40 luxury valuation explorer")
+    st.title("CAC 40 luxury valuation explorer", icon=":material/diamond:")
     with st.sidebar:
         ticker = st.selectbox("Company", list(names), format_func=lambda t: f"{names[t]} ({t})")
         scenario = st.radio("Scenario", SCENARIOS, index=1, horizontal=True)
@@ -215,7 +215,7 @@ def main() -> None:
         comps_tab(v)
     with t4:
         quality_tab()
-    st.divider()
+    st.space("medium")
     st.caption(
         f"Educational project, not investment advice. Valuation date: "
         f"{get_valuation_date().date()}. Data sources: {SOURCES}"
